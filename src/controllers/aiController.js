@@ -104,6 +104,20 @@ const generateQuestion = async (req, res) => {
       ? `La pregunta DEBE ser de la categoría: "${category_name}".`
       : 'Elige una categoría interesante de conocimiento general.';
 
+    // Semilla aleatoria para forzar variedad en cada llamada
+    const randomSeed = Math.floor(Math.random() * 100000);
+    const variationHints = [
+      'Elige un subtema poco común dentro de la categoría.',
+      'Enfócate en un dato curioso o sorprendente del tema.',
+      'Elige un ángulo histórico o de origen del tema.',
+      'Enfócate en un aspecto práctico o aplicado del tema.',
+      'Elige un ejemplo concreto o caso real del tema.',
+      'Elige un personaje, lugar o evento específico relacionado al tema.',
+      'Enfócate en una comparación o diferencia dentro del tema.',
+      'Aborda el tema desde una perspectiva científica o técnica.',
+    ];
+    const variationHint = variationHints[randomSeed % variationHints.length];
+
     const prompt = `
 Eres un generador de preguntas para un juego de trivia. Genera UNA pregunta siguiendo estas reglas estrictas:
 
@@ -114,6 +128,9 @@ NIVEL DE DIFICULTAD: ${level}
 ${difficultyLabel}
 
 CATEGORÍA: ${categoryInstruction}
+
+VARIACIÓN REQUERIDA (semilla: ${randomSeed}): ${variationHint}
+NO repitas preguntas usadas anteriormente. Sé creativo y varía el enfoque, el subtema y los ejemplos.
 
 REGLAS OBLIGATORIAS:
 - Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, sin explicaciones.
@@ -132,7 +149,7 @@ REGLAS OBLIGATORIAS:
 `;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -140,7 +157,7 @@ REGLAS OBLIGATORIAS:
         },
         { role: 'user', content: prompt },
       ],
-      temperature: 0.8,
+      temperature: 1.1,
       max_tokens: 500,
     });
 
